@@ -1,5 +1,4 @@
-package hw3;
-
+// package hw3;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Partitioner;
 
@@ -33,81 +32,80 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import java.net.URL;
 
+ 
 
 public class HW3 extends Configured implements Tool {
 
-    static enum Counters {
-        ROBOTS_COUNTER
+public static class TextPair implements WritableComparable<TextPair> {
+    private Text first;
+    private Text second;
+
+    public TextPair() {
+        first = new Text();
+        second = new Text();
     }
 
-    public static class TextPair implements WritableComparable<TextPair> {
-        private Text first;
-        private Text second;
+    public TextPair(String _first, String _second) {
+        first = new Text(_first);
+        second = new Text(_second);
+    }
 
-        public TextPair() {
-            first = new Text();
-            second = new Text();
+    public TextPair(Text _first, Text _second) {
+        first = _first;
+        second = _second;
+    }
+
+    public Text getFirst() {
+        return first;
+    }
+
+    public Text getSecond() {
+        return second;
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        first.write(out);
+        second.write(out);
+    }
+
+    @Override
+    public int compareTo(@Nonnull TextPair o) {
+        int a = first.compareTo(o.first);
+        if (a == 0) {
+            a = second.compareTo(o.second);
         }
+        return a;
+    }
 
-        public TextPair(String _first, String _second) {
-            first = new Text(_first);
-            second = new Text(_second);
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+        first.readFields(dataInput);
+        second.readFields(dataInput);
+    }
+
+    @Override
+    public int hashCode() {
+        return first.hashCode() * 163 + second.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TextPair)) {
+            return false;
         }
+        TextPair tp = (TextPair) obj;
+        return first.equals(tp.first) && second.equals(tp.second);
+    }
 
-        public TextPair(Text _first, Text _second) {
-            first = _first;
-            second = _second;
-        }
+    @Override
+    public String toString() {
+        return first + "\t" + second;
+    }
+} // TextPair
 
-        public Text getFirst() {
-            return first;
-        }
 
-        public Text getSecond() {
-            return second;
-        }
-
-        @Override
-        public void write(DataOutput out) throws IOException {
-            first.write(out);
-            second.write(out);
-        }
-
-        @Override
-        public int compareTo(@Nonnull TextPair o) {
-            int a = first.compareTo(o.first);
-            if (a == 0) {
-                a = second.compareTo(o.second);
-            }
-            return a;
-        }
-
-        @Override
-        public void readFields(DataInput dataInput) throws IOException {
-            first.readFields(dataInput);
-            second.readFields(dataInput);
-        }
-
-        @Override
-        public int hashCode() {
-            return first.hashCode() * 163 + second.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof TextPair)) {
-                return false;
-            }
-            TextPair tp = (TextPair) obj;
-            return first.equals(tp.first) && second.equals(tp.second);
-        }
-
-        @Override
-        public String toString() {
-            return first + "\t" + second;
-        }
-    } // TextPair
-
+		
     public int on_finish(String[] args) throws Exception {
         Job job = GetJobConf(args);
         System.out.println("NUMBER_OF_REDUCERS = " + job.getCounters().findCounter("NUMBER_OF_REDUCERS", "num").getValue());
@@ -125,8 +123,12 @@ public class HW3 extends Configured implements Tool {
     }
 
     Job GetJobConf(String[] args) throws IOException {
-        Job job = Job.getInstance(getConf(), "HW3Kaspar");
+        Job job = Job.getInstance(getConf(), HW3.class.getCanonicalName());
         job.setJarByClass(HW3.class);
+
+        job.setPartitionerClass(FirstPartitioner.class);
+        job.setSortComparatorClass(KeyComparator.class);
+        job.setGroupingComparatorClass(GroupComparator.class);
 
         List<Scan> scans = new ArrayList<Scan>();
         Scan scan1 = new Scan();
@@ -141,15 +143,15 @@ public class HW3 extends Configured implements Tool {
         scan2.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME, Bytes.toBytes("websites_kaspar"));
         scans.add(scan2);
 
-        TableMapReduceUtil.initTableMapperJob(scans, HW3Mapper.class, TextPair.class, Text.class, job);
+        System.out.println("-----here");
+        TableMapReduceUtil.initTableMapperJob(scans, HW3Mapper.class, TextPair.class, Text.class, job, true);
+        System.out.println("-----here");
 
         job.setMapOutputKeyClass(TextPair.class);
         job.setMapOutputValueClass(Text.class);
-        job.setPartitionerClass(FirstPartitioner.class);
-        job.setSortComparatorClass(KeyComparator.class);
-        job.setGroupingComparatorClass(GroupComparator.class);
 
         TableMapReduceUtil.initTableReducerJob(new String("pages"), HW3Reducer.class, job);
+
         return job;
     }
 
