@@ -1,2 +1,2 @@
 ./gradlew jar
-hadoop jar build/libs/hw3.jar hw3.HW3
+hadoop jar build/libs/hw3.jar HW3
