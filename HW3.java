@@ -110,23 +110,11 @@ public class HW3 extends Configured implements Tool {
 
     public int on_finish(String[] args) throws Exception {
         Job job = GetJobConf(args);
-        System.out.println("NUMBER_OF_REDUCERS  num = " + job.getCounters().findCounter("NUMBER_OF_REDUCERS", "num").getValue());
-        System.out.println("ROBOTS_COUNTER  num = " + job.getCounters().findCounter("ROBOTS_COUNTER", "num").getValue());
-        System.out.println("ROBOTS_WITH_/  num = " + job.getCounters().findCounter("ROBOTS_WITH_/", "num").getValue());
-        System.out.println("ROBOTS_WITH_*  num = " + job.getCounters().findCounter("ROBOTS_WITH_*", "num").getValue());
-        System.out.println("ROBOTS_WITH_$  num = " + job.getCounters().findCounter("ROBOTS_WITH_$", "num").getValue());
-        System.out.println("ROBOTS_WITH_ELSE  num = " + job.getCounters().findCounter("ROBOTS_WITH_ELSE", "num").getValue());
-
-//        job.getCounters().findCounter("NUMBER_OF_REDUCERS", "num");
-//        job.getCounters().findCounter("ROBOTS_COUNTER", "num");
-//        job.getCounters().findCounter("ROBOTS_WITH_/", "num");
-//        job.getCounters().findCounter("ROBOTS_WITH_*", "num");
-//        job.getCounters().findCounter("ROBOTS_WITH_$", "num");
-//        job.getCounters().findCounter("ROBOTS_WITH_ELSE", "num");
-//        job.getCounters().findCounter("DISALLOWED_WITH_/", "num");
-//        job.getCounters().findCounter("DISALLOWED_WITH_*", "num");
-//        job.getCounters().findCounter("DISALLOWED_WITH_$", "num");
-//
+        System.out.println("NUMBER_OF_REDUCERS = " + job.getCounters().findCounter("NUMBER_OF_REDUCERS", "num").getValue());
+        System.out.println("DISALLOWED = " + job.getCounters().findCounter("DISALLOWED", "num").getValue());
+        System.out.println("UPDATED_PAGES = " + job.getCounters().findCounter("UPDATED_PAGES", "num").getValue());
+        System.out.println("webpages = " + job.getCounters().findCounter("webpages", "num").getValue());
+        System.out.println("websites = " + job.getCounters().findCounter("websites", "num").getValue());
         return 0;
     }
 
